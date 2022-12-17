@@ -28,6 +28,6 @@ if __name__ == "__main__":
     model_name = ".".join(cmds.f.split(".")[:-1])
     converted = convert(cmds.f, cmds.half, cmds.no_ema)
     if cmds.safe_tensors:
-        save_file(converted, model_name + "safetensors")
+        save_file(converted, model_name + ".safetensors")
     else:
         torch.save({"state_dict": converted}, model_name + "-convert.ckpt")
