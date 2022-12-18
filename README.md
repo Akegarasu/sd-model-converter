@@ -4,8 +4,24 @@ convert stable diffusion model to fp16 / remove ema / safetensors
 
 ## Usage
 
+default save ema only model.
+
+--fp16: save fp16 model (half)  
+--full: full model (with non-ema)  
+--safe-tensors
+
 ```
-python convert.py --f path/to/model.ckpt --half --no-ema --safe-tensors
+# convert to ema only
+python convert.py --f path/to/model.ckpt
+
+# convert to ema only, fp16
+python convert.py --f path/to/model.ckpt --fp16
+
+# convert to ema only, fp16, safe-tensors
+python convert.py --f path/to/model.ckpt --fp16 --safe-tensors
+
+# convert to fp16
+python convert.py --f path/to/model.ckpt --fp16 --full
 ```
 
 before: 
