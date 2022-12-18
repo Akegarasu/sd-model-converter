@@ -40,7 +40,7 @@ if __name__ == "__main__":
     model_name = ".".join(cmds.f.split(".")[:-1])
     converted = convert(cmds.f, cmds.fp16, not cmds.full)
     save_name = model_name if cmds.full else f"{model_name}-prune"
-    save_name += "-fp16" if cmds.fp6 else ""
+    save_name += "-fp16" if cmds.fp16 else ""
     if cmds.safe_tensors:
         save_file(converted, save_name + ".safetensors")
     else:
