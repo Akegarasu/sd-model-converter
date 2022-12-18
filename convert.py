@@ -12,7 +12,7 @@ parser.add_argument("--safe-tensors", action="store_true", default=False, help="
 def convert(path: str, half: bool, ema_only: bool = True):
     m = torch.load(path, map_location="cpu")
     state_dict = m["state_dict"] if "state_dict" in m else m
-    ok = {}
+    ok = {"state_dict": {}}  # should be dict() here but due to novelai's typo added a key
     if ema_only:
         for k in state_dict:
             ema_k = "___"
@@ -41,7 +41,9 @@ if __name__ == "__main__":
     converted = convert(cmds.f, cmds.fp16, not cmds.full)
     save_name = model_name if cmds.full else f"{model_name}-prune"
     save_name += "-fp16" if cmds.fp16 else ""
+    print("convert ok, saving model")
     if cmds.safe_tensors:
         save_file(converted, save_name + ".safetensors")
     else:
         torch.save({"state_dict": converted}, save_name + ".ckpt")
+    print("convert finish.")
