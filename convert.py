@@ -43,6 +43,7 @@ if __name__ == "__main__":
     save_name += "-fp16" if cmds.fp16 else ""
     print("convert ok, saving model")
     if cmds.safe_tensors:
+        del converted["state_dict"]
         save_file(converted, save_name + ".safetensors")
     else:
         torch.save({"state_dict": converted}, save_name + ".ckpt")
