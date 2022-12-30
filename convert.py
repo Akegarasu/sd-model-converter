@@ -30,7 +30,7 @@ def convert(path: str, half: bool, ema_only: bool = True):
     else:
         m = torch.load(path, map_location="cpu")
     state_dict = m["state_dict"] if "state_dict" in m else m
-    ok = {"state_dict": {}}  # should be dict() here but due to novelai's typo added a key
+    ok = {}  # {"state_dict": {}}
     if ema_only:
         for k in state_dict:
             ema_k = "___"
