@@ -1,12 +1,27 @@
 import torch
+from torch import Tensor
 from safetensors.torch import save_file, load_file
 import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--f", type=str, default="model.ckpt", help="path to model")
 parser.add_argument("--fp16", action="store_true", default=False, help="save fp16 model")
+parser.add_argument("--bf16", action="store_true", default=False, help="save bf16 model")
 parser.add_argument("--full", action="store_true", default=False, help="save full model instead of ema only")
 parser.add_argument("--safe-tensors", action="store_true", default=False, help="use safetensors model format")
+
+cmds = parser.parse_args()
+
+
+def _hf(t: Tensor):
+    if not isinstance(t, Tensor):
+        return t
+    if cmds.fp16:
+        return t.half()
+    elif cmds.bf16:
+        return t.bfloat16()
+    else:
+        return t
 
 
 def convert(path: str, half: bool, ema_only: bool = True):
@@ -24,22 +39,25 @@ def convert(path: str, half: bool, ema_only: bool = True):
             except:
                 pass
             if ema_k in state_dict:
-                ok[k] = state_dict[ema_k].half() if half else state_dict[ema_k]
+                ok[k] = _hf(state_dict[ema_k])
                 print("ema: " + ema_k + " > " + k)
             elif not k.startswith("model_ema.") or k in ["model_ema.num_updates", "model_ema.decay"]:
-                ok[k] = state_dict[k].half() if half else state_dict[k]
+                ok[k] = _hf(state_dict[k])
                 print(k)
             else:
                 print("skipped: " + k)
     else:
         for k, v in state_dict.items():
-            ok[k] = v.half() if half else v
+            ok[k] = _hf(v)
 
     return ok
 
 
-if __name__ == "__main__":
-    cmds = parser.parse_args()
+def main():
+    if cmds.fp16 and cmds.bf16:
+        print("You should choose one from fp16 & bf16")
+        return
+
     model_name = ".".join(cmds.f.split(".")[:-1])
     converted = convert(cmds.f, cmds.fp16, not cmds.full)
     save_name = f"{model_name}-convert" if cmds.full else f"{model_name}-prune"
@@ -51,3 +69,7 @@ if __name__ == "__main__":
     else:
         torch.save({"state_dict": converted}, save_name + ".ckpt")
     print("convert finish.")
+
+
+if __name__ == "__main__":
+    main()
