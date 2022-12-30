@@ -1,5 +1,5 @@
 import torch
-from safetensors.torch import save_file
+from safetensors.torch import save_file, load_file
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -10,7 +10,10 @@ parser.add_argument("--safe-tensors", action="store_true", default=False, help="
 
 
 def convert(path: str, half: bool, ema_only: bool = True):
-    m = torch.load(path, map_location="cpu")
+    if path.endswith(".safetensors"):
+        m = load_file(path, device="cpu")
+    else:
+        m = torch.load(path, map_location="cpu")
     state_dict = m["state_dict"] if "state_dict" in m else m
     ok = {"state_dict": {}}  # should be dict() here but due to novelai's typo added a key
     if ema_only:
