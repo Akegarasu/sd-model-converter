@@ -35,6 +35,7 @@ def conv_full(t):
 _g_precision_func = {
     "full": conv_full,
     "fp32": conv_full,
+    "half": conv_fp16,
     "fp16": conv_fp16,
     "bf16": conv_bf16,
 }
