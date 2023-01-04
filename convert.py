@@ -5,33 +5,47 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--f", type=str, default="model.ckpt", help="path to model")
-parser.add_argument("--fp16", action="store_true", default=False, help="save fp16 model")
-parser.add_argument("--bf16", action="store_true", default=False, help="save bf16 model")
-parser.add_argument("--full", action="store_true", default=False, help="save full model instead of ema only")
+parser.add_argument("--precision", default="full", help="precision fp32(full)/fp16/bf16")
+parser.add_argument("--type", type=str, default="ema-only", help="convert types full/ema_only/no_ema")
 parser.add_argument("--safe-tensors", action="store_true", default=False, help="use safetensors model format")
 
 cmds = parser.parse_args()
 
 
-def _hf(t: Tensor):
+def conv_fp16(t: Tensor):
     if not isinstance(t, Tensor):
         return t
-    if cmds.fp16:
-        return t.half()
-    elif cmds.bf16:
-        return t.bfloat16()
-    else:
+    return t.half()
+
+
+def conv_bf16(t: Tensor):
+    if not isinstance(t, Tensor):
         return t
+    return t.bfloat16()
 
 
-def convert(path: str, half: bool, ema_only: bool = True):
+def conv_full(t):
+    return t
+
+
+_g_precision_func = {
+    "full": conv_full,
+    "fp32": conv_full,
+    "fp16": conv_fp16,
+    "bf16": conv_bf16,
+}
+
+
+def convert(path: str, conv_type: str):
     if path.endswith(".safetensors"):
         m = load_file(path, device="cpu")
     else:
         m = torch.load(path, map_location="cpu")
+
+    _hf = _g_precision_func[cmds.precision]
     state_dict = m["state_dict"] if "state_dict" in m else m
     ok = {}  # {"state_dict": {}}
-    if ema_only:
+    if conv_type == "ema_only":
         for k in state_dict:
             ema_k = "___"
             try:
@@ -46,10 +60,13 @@ def convert(path: str, half: bool, ema_only: bool = True):
                 print(k)
             else:
                 print("skipped: " + k)
+    elif conv_type == "no_ema":
+        for k, v in state_dict.items():
+            if "model_ema" not in k:
+                ok[k] = _hf(v)
     else:
         for k, v in state_dict.items():
             ok[k] = _hf(v)
-
     return ok
 
 
@@ -59,9 +76,8 @@ def main():
         return
 
     model_name = ".".join(cmds.f.split(".")[:-1])
-    converted = convert(cmds.f, cmds.fp16, not cmds.full)
-    save_name = f"{model_name}-convert" if cmds.full else f"{model_name}-prune"
-    save_name += "-fp16" if cmds.fp16 else ""
+    converted = convert(cmds.f, cmds.type)
+    save_name = f"{model_name}-{cmds.type}"
     print("convert ok, saving model")
     if cmds.safe_tensors:
         del converted["state_dict"]
