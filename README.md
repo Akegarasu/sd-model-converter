@@ -4,11 +4,12 @@ convert stable diffusion model to fp16/bf16 no-ema/ema-only safetensors
 
 ## Usage
 
-default save ema only model.
+default fp32, full model.
 
---fp16: save fp16 model (half)  
---full: full model (with non-ema)  
---safe-tensors
+-f: file path
+-t: convert type full/ema-only/no-ema
+-p: precision fp32(full)/fp16/bf16
+-st: safe-tensors model format
 
 ```
 # convert to ema only

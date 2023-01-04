@@ -6,9 +6,9 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--file", type=str,
                     default="model.ckpt", help="path to model")
-parser.add_argument("-p", "--precision", default="full",
+parser.add_argument("-p", "--precision", default="fp32",
                     help="precision fp32(full)/fp16/bf16")
-parser.add_argument("-t", "--type", type=str, default="ema-only",
+parser.add_argument("-t", "--type", type=str, default="full",
                     help="convert types full/ema-only/no-ema")
 parser.add_argument("-st", "--safe-tensors", action="store_true",
                     default=False, help="use safetensors model format")
