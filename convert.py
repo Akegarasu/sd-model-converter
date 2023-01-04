@@ -4,10 +4,14 @@ from safetensors.torch import save_file, load_file
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--f", type=str, default="model.ckpt", help="path to model")
-parser.add_argument("--precision", default="full", help="precision fp32(full)/fp16/bf16")
-parser.add_argument("--type", type=str, default="ema-only", help="convert types full/ema-only/no-ema")
-parser.add_argument("--safe-tensors", action="store_true", default=False, help="use safetensors model format")
+parser.add_argument("-f", "--file", type=str,
+                    default="model.ckpt", help="path to model")
+parser.add_argument("-p", "--precision", default="full",
+                    help="precision fp32(full)/fp16/bf16")
+parser.add_argument("-t", "--type", type=str, default="ema-only",
+                    help="convert types full/ema-only/no-ema")
+parser.add_argument("-st", "--safe-tensors", action="store_true",
+                    default=False, help="use safetensors model format")
 
 cmds = parser.parse_args()
 
@@ -45,7 +49,7 @@ def convert(path: str, conv_type: str):
     else:
         m = torch.load(path, map_location="cpu")
     state_dict = m["state_dict"] if "state_dict" in m else m
-    if conv_type == "ema-only":
+    if conv_type == "ema-only" or conv_type == "prune":
         for k in state_dict:
             ema_k = "___"
             try:

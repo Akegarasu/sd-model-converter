@@ -1,6 +1,6 @@
 # sd-model-converter
 
-convert stable diffusion model to fp16 / ema only / safetensors
+convert stable diffusion model to fp16/bf16 no-ema/ema-only safetensors
 
 ## Usage
 
@@ -12,16 +12,20 @@ default save ema only model.
 
 ```
 # convert to ema only
-python convert.py --f path/to/model.ckpt
+python convert.py -f path/to/model.ckpt -t ema-only
+
+or
+
+python convert.py -f path/to/model.ckpt -t prune
 
 # convert to ema only, fp16
-python convert.py --f path/to/model.ckpt --fp16
+python convert.py -f path/to/model.ckpt -t prune -p fp16
 
 # convert to ema only, fp16, safe-tensors
-python convert.py --f path/to/model.ckpt --fp16 --safe-tensors
+python convert.py -f path/to/model.ckpt -t prune -p fp16 --safe-tensors
 
 # convert to fp16
-python convert.py --f path/to/model.ckpt --fp16 --full
+python convert.py -f path/to/model.ckpt -p fp16
 ```
 
 before: 
