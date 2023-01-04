@@ -35,8 +35,4 @@ Anything-V3.0.ckpt 7.17 GB
 
 after: 
 
-Anything-V3.0-prune.ckpt 3.97 GB  
-Anything-V3.0-prune-fp16.ckpt 1.98 GB  
-Anything-V3.0-prune-fp16.safetensors 1.98 GB  
-
-![GIESB1FHR%3_ _ A}88M0}X](https://user-images.githubusercontent.com/36563862/208284000-81823e5d-1686-427f-913d-98a95d232c25.jpg)
+![{V71`3YV22UP2A9R2 LGVDN](https://user-images.githubusercontent.com/36563862/210568635-9a17c235-8f96-4d62-ae48-870557e9cf90.png)
