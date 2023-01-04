@@ -75,12 +75,11 @@ def convert(path: str, conv_type: str):
 
 
 def main():
-    model_name = ".".join(cmds.f.split(".")[:-1])
-    converted = convert(cmds.f, cmds.type)
-    save_name = f"{model_name}-{cmds.type}"
+    model_name = ".".join(cmds.file.split(".")[:-1])
+    converted = convert(cmds.file, cmds.type)
+    save_name = f"{model_name}-{cmds.type}-{cmds.precision}"
     print("convert ok, saving model")
     if cmds.safe_tensors:
-        del converted["state_dict"]
         save_file(converted, save_name + ".safetensors")
     else:
         torch.save({"state_dict": converted}, save_name + ".ckpt")
