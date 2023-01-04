@@ -6,7 +6,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--f", type=str, default="model.ckpt", help="path to model")
 parser.add_argument("--precision", default="full", help="precision fp32(full)/fp16/bf16")
-parser.add_argument("--type", type=str, default="ema-only", help="convert types full/ema_only/no_ema")
+parser.add_argument("--type", type=str, default="ema-only", help="convert types full/ema-only/no-ema")
 parser.add_argument("--safe-tensors", action="store_true", default=False, help="use safetensors model format")
 
 cmds = parser.parse_args()
@@ -37,15 +37,15 @@ _g_precision_func = {
 
 
 def convert(path: str, conv_type: str):
+    ok = {}  # {"state_dict": {}}
+    _hf = _g_precision_func[cmds.precision]
+
     if path.endswith(".safetensors"):
         m = load_file(path, device="cpu")
     else:
         m = torch.load(path, map_location="cpu")
-
-    _hf = _g_precision_func[cmds.precision]
     state_dict = m["state_dict"] if "state_dict" in m else m
-    ok = {}  # {"state_dict": {}}
-    if conv_type == "ema_only":
+    if conv_type == "ema-only":
         for k in state_dict:
             ema_k = "___"
             try:
@@ -60,7 +60,7 @@ def convert(path: str, conv_type: str):
                 print(k)
             else:
                 print("skipped: " + k)
-    elif conv_type == "no_ema":
+    elif conv_type == "no-ema":
         for k, v in state_dict.items():
             if "model_ema" not in k:
                 ok[k] = _hf(v)
@@ -71,10 +71,6 @@ def convert(path: str, conv_type: str):
 
 
 def main():
-    if cmds.fp16 and cmds.bf16:
-        print("You should choose one from fp16 & bf16")
-        return
-
     model_name = ".".join(cmds.f.split(".")[:-1])
     converted = convert(cmds.f, cmds.type)
     save_name = f"{model_name}-{cmds.type}"
